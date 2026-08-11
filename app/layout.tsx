@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { ScrollProgress } from '@/components/ui/ScrollProgress'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -43,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark bg-background scroll-smooth">
       <body className={`${inter.className} antialiased`}>
+        <ScrollProgress />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

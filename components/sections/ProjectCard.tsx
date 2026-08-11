@@ -4,7 +4,8 @@ import type { Project } from '@/types/portfolio'
 import { ExternalLink } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useRef, MouseEvent as ReactMouseEvent } from 'react'
+import { motion } from 'framer-motion'
 
 interface ProjectCardProps {
   project: Project
@@ -13,6 +14,17 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, size = 'medium' }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  const handleMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    })
+  }
 
   const sizeClasses = {
     small: 'col-span-1',
@@ -22,14 +34,26 @@ export function ProjectCard({ project, size = 'medium' }: ProjectCardProps) {
 
   return (
     <Link href={`/projects/${project.slug || project.id}`} className="block">
-      <div
-        className={`${sizeClasses[size]} h-full group relative overflow-hidden rounded-2xl bg-card border border-white/10 hover:border-accent/50 transition-all duration-300 hover:scale-105 ${
-        isHovered ? 'glow' : ''
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Image */}
+      <motion.div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className={`${sizeClasses[size]} h-full group relative overflow-hidden rounded-2xl bg-card border border-white/10 hover:border-accent/50 transition-all duration-300 hover:scale-[1.02]`}
+      >
+        {/* Mouse tracking Spotlight Effect */}
+        <div
+          className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100 z-20 mix-blend-screen"
+          style={{
+            background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(168,85,247,0.15), transparent 40%)`,
+          }}
+        />
+
+        {/* Image */}
       {project.image && (
         <div className="relative w-full h-64 md:h-full overflow-hidden">
           <Image
@@ -82,7 +106,7 @@ export function ProjectCard({ project, size = 'medium' }: ProjectCardProps) {
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
     </Link>
   )
 }

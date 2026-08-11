@@ -7,9 +7,9 @@ export default defineType({
   fields: [
     defineField({
       name: 'name',
-      title: 'Skill Name',
+      title: 'Skills',
       type: 'string',
-      description: 'e.g., React, Node.js, Figma',
+      description: 'You can enter multiple skills separated by commas (e.g., Javascript, PHP, GO)',
       validation: (Rule) => Rule.required(),
     }),
     defineField({

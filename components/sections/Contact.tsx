@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 
 // Icon components
 const MailIcon = () => (
@@ -30,7 +31,7 @@ const TwitterIcon = () => (
   </svg>
 )
 
-export function Contact() {
+export function Contact({ profile }: { profile?: any }) {
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,64 +41,91 @@ export function Contact() {
   }
 
   return (
-    <section id="contact" className="py-20 px-6 max-w-4xl mx-auto">
-      <div className="text-center mb-16">
+    <section id="contact" className="py-24 px-6 max-w-6xl mx-auto relative z-10">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="text-center mb-20"
+      >
         <h2 className="text-4xl md:text-5xl font-bold mb-4">
           <span className="gradient-text">Let's Work Together</span>
         </h2>
-        <p className="text-text-secondary text-lg">
+        <p className="text-text-secondary text-lg max-w-xl mx-auto">
           I'm always interested in hearing about new projects and opportunities.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-12">
+      <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
         {/* Contact Info */}
-        <div className="space-y-8">
-          <div className="glass-dark p-6 rounded-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-5 h-5 text-accent"><MailIcon /></div>
-              <span className="text-sm text-text-secondary">Email</span>
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          className="space-y-10"
+        >
+          <div className="glass-dark p-8 rounded-3xl border border-white/10 hover:border-accent/30 transition-all duration-300">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                <MailIcon />
+              </div>
+              <span className="text-sm text-text-secondary uppercase tracking-wider font-bold">Email</span>
             </div>
-            <a href="mailto:hello@example.com" className="text-lg font-semibold hover:text-accent transition-colors">
-              hello@example.com
+            <a href={`mailto:${profile?.email || 'hello@example.com'}`} className="text-2xl font-bold text-text-primary hover:text-accent transition-colors break-all">
+              {profile?.email || 'hello@example.com'}
             </a>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Connect with me</h3>
-            <div className="flex gap-3">
-              <Link
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full glass-dark hover:bg-accent/20 transition-all duration-300 hover:border-accent/50"
-              >
-                <GithubIcon />
-              </Link>
-              <Link
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full glass-dark hover:bg-accent/20 transition-all duration-300 hover:border-accent/50"
-              >
-                <LinkedinIcon />
-              </Link>
-              <Link
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 rounded-full glass-dark hover:bg-accent/20 transition-all duration-300 hover:border-accent/50"
-              >
-                <TwitterIcon />
-              </Link>
+            <h3 className="text-lg font-bold mb-6 text-text-primary">Connect with me</h3>
+            <div className="flex gap-4">
+              {profile?.githubUrl && (
+                <Link
+                  href={profile.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-full glass-dark border border-white/10 hover:bg-accent/20 hover:border-accent hover:scale-110 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300"
+                >
+                  <GithubIcon />
+                </Link>
+              )}
+              {profile?.linkedinUrl && (
+                <Link
+                  href={profile.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-full glass-dark border border-white/10 hover:bg-accent/20 hover:border-accent hover:scale-110 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300"
+                >
+                  <LinkedinIcon />
+                </Link>
+              )}
+              {profile?.twitterUrl && (
+                <Link
+                  href={profile.twitterUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-full glass-dark border border-white/10 hover:bg-accent/20 hover:border-accent hover:scale-110 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300"
+                >
+                  <TwitterIcon />
+                </Link>
+              )}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Contact Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <motion.form 
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+          onSubmit={handleSubmit} 
+          className="glass-dark p-8 md:p-10 rounded-3xl border border-white/10 space-y-6"
+        >
           <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-2">
+            <label htmlFor="name" className="block text-sm font-medium mb-2 text-text-secondary">
               Name
             </label>
             <input
@@ -105,12 +133,12 @@ export function Contact() {
               type="text"
               placeholder="Your name"
               required
-              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-colors"
+              className="w-full px-5 py-4 rounded-xl bg-bg-dark border border-white/10 focus:border-accent focus:shadow-[0_0_15px_rgba(168,85,247,0.3)] focus:outline-none transition-all duration-300 text-text-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
+            <label htmlFor="email" className="block text-sm font-medium mb-2 text-text-secondary">
               Email
             </label>
             <input
@@ -118,12 +146,12 @@ export function Contact() {
               type="email"
               placeholder="your@email.com"
               required
-              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-colors"
+              className="w-full px-5 py-4 rounded-xl bg-bg-dark border border-white/10 focus:border-accent focus:shadow-[0_0_15px_rgba(168,85,247,0.3)] focus:outline-none transition-all duration-300 text-text-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="message" className="block text-sm font-medium mb-2">
+            <label htmlFor="message" className="block text-sm font-medium mb-2 text-text-secondary">
               Message
             </label>
             <textarea
@@ -131,23 +159,19 @@ export function Contact() {
               placeholder="Tell me about your project..."
               rows={4}
               required
-              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-colors resize-none"
+              className="w-full px-5 py-4 rounded-xl bg-bg-dark border border-white/10 focus:border-accent focus:shadow-[0_0_15px_rgba(168,85,247,0.3)] focus:outline-none transition-all duration-300 resize-none text-text-primary"
             />
           </div>
 
           <Button
             type="submit"
-            className="w-full bg-accent hover:bg-accent hover:shadow-lg hover:shadow-accent/50 text-white rounded-lg font-medium"
+            className="w-full bg-accent hover:bg-accent/90 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] text-white rounded-xl py-6 font-bold text-lg transition-all duration-300"
           >
-            {isSubmitted ? 'Message Sent!' : 'Send Message'}
+            {isSubmitted ? '✨ Message Sent!' : 'Send Message'}
           </Button>
-        </form>
+        </motion.form>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-white/10 mt-16 pt-8 text-center text-text-secondary">
-        <p>Crafted with care by a passionate developer &copy; 2024</p>
-      </div>
     </section>
   )
 }

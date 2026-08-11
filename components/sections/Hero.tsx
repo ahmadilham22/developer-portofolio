@@ -1,8 +1,10 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 // Social media icons as SVG components
 const GithubIcon = () => (
@@ -17,66 +19,119 @@ const LinkedinIcon = () => (
   </svg>
 )
 
-export function Hero() {
+import Image from 'next/image'
+
+export function Hero({ profile }: { profile?: any }) {
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 px-6 overflow-hidden">
       {/* Animated gradient background */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full mix-blend-screen blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full mix-blend-screen blur-3xl animation-float animation-delay-2000" />
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full mix-blend-screen blur-3xl animate-float" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.3, 1], rotate: [0, -90, 0] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full mix-blend-screen blur-3xl animation-float animation-delay-2000" 
+        />
       </div>
 
-      <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-          <span className="gradient-text">Full-Stack Developer</span>
-          <br />
-          <span className="text-text-primary">Building Digital Experiences</span>
-        </h1>
-
-        <p className="text-lg md:text-xl text-text-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
-          I design and develop modern web applications with a focus on performance, scalability, and user experience. Specialized in React, Next.js, and cloud architecture.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Button size="lg" className="bg-accent hover:bg-accent hover:shadow-lg hover:shadow-accent/50 text-white rounded-full">
-            View My Work
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="rounded-full border-white/20 hover:bg-white/5"
+      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center w-full relative z-10">
+        
+        {/* Left Column: Text & CTA */}
+        <div className="text-left space-y-8 order-2 md:order-1">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-500/30 bg-green-500/10 backdrop-blur-sm"
           >
-            Let's Talk
-          </Button>
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-sm font-medium text-green-400">Available for work</span>
+          </motion.div>
+
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-5xl md:text-7xl font-bold leading-tight"
+          >
+            <span className="text-text-primary text-2xl md:text-3xl font-medium mb-4 block">
+              {profile?.greeting || "Hi, I'm a Developer ✌️"}
+            </span>
+            <span className="gradient-text">
+              {profile?.titleLine1 || "Crafting Digital"}
+            </span>
+            <br />
+            <span className="text-white">
+              {profile?.titleLine2 || "Experiences"}
+            </span>
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="text-lg md:text-xl text-text-secondary max-w-xl leading-relaxed"
+          >
+            {profile?.description || "I design and develop modern web applications with a focus on performance, scalability, and beautiful user interfaces."}
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            className="flex flex-col sm:flex-row gap-4 pt-2"
+          >
+            <a 
+              href="#work" 
+              className={cn(buttonVariants({ size: "lg" }), "bg-accent hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/50 text-white rounded-full")}
+            >
+              View My Work
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </a>
+            <a
+              href="#contact"
+              className={cn(buttonVariants({ size: "lg", variant: "outline" }), "rounded-full border-white/20 hover:bg-white/5")}
+            >
+              Let's Talk
+            </a>
+          </motion.div>
         </div>
 
-        <div className="flex gap-4 justify-center">
-          <Link
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-3 rounded-full glass-dark hover:bg-accent/20 transition-all duration-300"
-          >
-            <GithubIcon />
-          </Link>
-          <Link
-            href="https://linkedin.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-3 rounded-full glass-dark hover:bg-accent/20 transition-all duration-300"
-          >
-            <LinkedinIcon />
-          </Link>
-        </div>
+        {/* Right Column: Avatar/Photo */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="order-1 md:order-2 flex justify-center md:justify-end"
+        >
+          <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96">
+            {/* Outer glow rings */}
+            <div className="absolute inset-0 bg-accent/20 rounded-full blur-[80px] animate-pulse" />
+            <div className="absolute inset-4 border border-accent/30 rounded-full animate-[spin_10s_linear_infinite]" />
+            <div className="absolute inset-8 border border-white/10 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+            
+            {/* Photo Container */}
+            <div className="absolute inset-0 rounded-full border border-white/10 bg-card overflow-hidden glass-dark flex flex-col items-center justify-center text-center p-6 shadow-2xl">
+              {profile?.heroImage ? (
+                <Image src={profile.heroImage} alt="Profile" fill className="object-cover" priority />
+              ) : (
+                <>
+                  <div className="w-16 h-16 mb-4 rounded-xl bg-accent/20 flex items-center justify-center rotate-12">
+                    <span className="text-2xl">👨‍💻</span>
+                  </div>
+                  <span className="text-text-secondary text-sm font-medium">Your Photo Here</span>
+                  <span className="text-text-secondary/50 text-xs mt-2">Upload in CMS</span>
+                </>
+              )}
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 rounded-full border-2 border-white/20 flex items-start justify-center p-2">
-          <div className="w-1 h-2 bg-accent rounded-full animate-pulse" />
-        </div>
-      </div>
     </section>
   )
 }

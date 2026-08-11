@@ -11,6 +11,34 @@ import { client } from '@/sanity/lib/client'
 export const revalidate = 0 // Disable caching for now to see immediate updates
 
 export default async function Home() {
+  // Fetch profile settings (singleton)
+  const sanityProfile = await client.fetch(`*[_type == "profile"][0]{
+    greeting,
+    titleLine1,
+    titleLine2,
+    description,
+    email,
+    githubUrl,
+    linkedinUrl,
+    twitterUrl,
+    "heroImage": heroImage.asset->url,
+    "resumeUrl": resume.asset->url
+  }`)
+
+  // Fallback profile if CMS is empty
+  const profile = sanityProfile || {
+    greeting: 'Hi, I\'m a Developer ✌️',
+    titleLine1: 'Crafting Digital',
+    titleLine2: 'Experiences',
+    description: 'I design and develop modern web applications with a focus on performance, scalability, and beautiful user interfaces.',
+    email: 'hello@example.com',
+    githubUrl: 'https://github.com',
+    linkedinUrl: 'https://linkedin.com',
+    twitterUrl: 'https://twitter.com',
+    heroImage: null,
+    resumeUrl: null
+  }
+
   // Fetch projects from Sanity
   const sanityProjects = await client.fetch(`*[_type == "project"]{
     "id": _id,
@@ -41,12 +69,12 @@ export default async function Home() {
 
   return (
     <main className="w-full bg-background">
-      <Navbar />
-      <Hero />
+      <Navbar resumeUrl={profile.resumeUrl} />
+      <Hero profile={profile} />
       <Projects projects={sanityProjects.length > 0 ? sanityProjects : mockData.projects} />
       <Experience experiences={sanityExperience.length > 0 ? sanityExperience : mockData.experience} />
       <Skills skills={sanitySkills.length > 0 ? sanitySkills : mockData.skills} />
-      <Contact />
+      <Contact profile={profile} />
     </main>
   )
 }
