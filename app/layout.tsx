@@ -7,9 +7,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Developer Portfolio',
-  description: 'Premium developer portfolio showcasing projects, experience, and skills',
-  generator: 'v0.app',
+  title: 'Ahmad Ilham | Backend & Web Developer',
+  description: 'APIs and web applications by Ahmad Ilham. Selected projects, experience, and technologies.',
   icons: {
     icon: [
       {
@@ -32,7 +31,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   colorScheme: 'dark',
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: dark)', color: '#111113' },
   ],
 }
 

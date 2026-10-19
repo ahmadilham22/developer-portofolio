@@ -1,93 +1,43 @@
-import { Navbar } from '@/components/sections/Navbar'
-import { ProjectCard } from '@/components/sections/ProjectCard'
-import { mockData } from '@/lib/mockData'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { client } from '@/sanity/lib/client'
+import { PortfolioShell } from '@/components/portfolio/PortfolioShell'
+import { ProjectCard } from '@/components/sections/ProjectCard'
+import { getPortfolioContent } from '@/lib/portfolio'
+import { getProjectKind } from '@/lib/projectPresentation'
+import styles from '@/components/portfolio/portfolio.module.css'
 
-export const metadata = {
-  title: 'All Projects',
-  description: 'Complete portfolio of projects and past work',
+export const metadata: Metadata = {
+  title: 'All Projects | Ahmad Ilham',
+  description: 'Selected and archived APIs and web applications by Ahmad Ilham.',
 }
 
 export const revalidate = 0
 
 export default async function ProjectsPage() {
-  const sanityProfile = await client.fetch(`*[_type == "profile"][0]{
-    "resumeUrl": resume.asset->url
-  }`)
-
-  const sanityProjects = await client.fetch(`*[_type == "project"] | order(_createdAt desc) {
-    "id": _id,
-    "slug": slug.current,
-    title,
-    description,
-    "image": mainImage.asset->url,
-    "tags": techStack,
-    "url": link,
-    featured
-  }`)
-
-  // Separate featured and archived projects
-  const validProjects = sanityProjects.length > 0 ? sanityProjects : mockData.projects
-  const featuredProjects = validProjects.filter((p: any) => p.featured)
-  const archivedProjects = validProjects.filter((p: any) => !p.featured)
+  const { profile, projects, experience, skills } = await getPortfolioContent()
+  const featuredProjects = projects.filter((project) => project.featured)
+  const archivedProjects = projects.filter((project) => !project.featured)
+  const apiCount = projects.filter((project) => getProjectKind(project) === 'backend-api').length
+  const webCount = projects.length - apiCount
 
   return (
-    <main className="w-full bg-background">
-      <Navbar resumeUrl={sanityProfile?.resumeUrl} />
-      
-      <section className="py-24 px-6 max-w-7xl mx-auto">
-        {/* Header with Back Button */}
-        <div className="mb-16">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
-
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">
-            <span className="gradient-text">All Projects</span>
-          </h1>
-          <p className="text-text-secondary text-lg max-w-2xl">
-            A comprehensive collection of all my projects, including featured work and archived projects from throughout my career.
-          </p>
-        </div>
-
-        {/* Featured Projects Section */}
-        {featuredProjects.length > 0 && (
-          <div className="mb-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">Featured Projects</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[350px]">
-              {featuredProjects.map((project: any) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  size="large"
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Archived Projects Section */}
-        {archivedProjects.length > 0 && (
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">Archived Projects</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[350px]">
-              {archivedProjects.map((project: any) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  size="medium"
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
-    </main>
+    <PortfolioShell profile={profile} hasExperience={experience.length > 0} hasStack={skills.length > 0}>
+      <div className={`${styles.pageIntro} ${styles.projectIndexIntro}`}>
+        <Link href="/#work" className={styles.textLink}><ArrowLeft size={15} aria-hidden="true" /> Back to home</Link>
+        <h1>All projects<span>.</span></h1>
+        <p>APIs, web applications, and the work behind them.</p>
+        <div className={styles.indexSummary}><span>{String(projects.length).padStart(2, '0')} projects</span>{webCount > 0 && <span>{webCount} web {webCount === 1 ? 'application' : 'applications'}</span>}{apiCount > 0 && <span>{apiCount} backend {apiCount === 1 ? 'API' : 'APIs'}</span>}</div>
+      </div>
+      {featuredProjects.length > 0 && <section className={styles.collection} aria-labelledby="featured-title">
+        <div className={styles.sectionHeading}><div className={styles.headingGroup}><h2 id="featured-title">Featured projects</h2><span className={styles.projectCount}>{String(featuredProjects.length).padStart(2, '0')}</span></div></div>
+        <div className={styles.projectGrid}>{featuredProjects.map((project, index) => <ProjectCard key={project.id} project={project} priority={index < 2} detailed />)}</div>
+      </section>}
+      {archivedProjects.length > 0 && <section className={styles.collection} aria-labelledby="archived-title">
+        <div className={styles.sectionHeading}><div className={styles.headingGroup}><h2 id="archived-title">Archived projects</h2><span className={styles.projectCount}>{String(archivedProjects.length).padStart(2, '0')}</span></div></div>
+        <div className={styles.projectGrid}>{archivedProjects.map((project) => <ProjectCard key={project.id} project={project} detailed />)}</div>
+      </section>}
+      {projects.length === 0 && <p className={styles.emptyState}>No projects published yet.</p>}
+    </PortfolioShell>
   )
 }

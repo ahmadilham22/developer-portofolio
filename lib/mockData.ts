@@ -4,6 +4,7 @@ export const mockData: PortfolioData = {
   projects: [
     {
       id: '1',
+      slug: 'e-commerce-platform',
       title: 'E-Commerce Platform',
       description: 'A full-stack e-commerce solution with real-time inventory management, payment processing, and admin dashboard built for scale.',
       image: '/projects/ecommerce.png',
@@ -14,6 +15,7 @@ export const mockData: PortfolioData = {
     },
     {
       id: '2',
+      slug: 'ai-chat-assistant',
       title: 'AI Chat Assistant',
       description: 'Machine learning-powered conversational AI with context awareness, multi-language support, and real-time response streaming.',
       image: '/projects/ai-chat.png',
@@ -24,6 +26,7 @@ export const mockData: PortfolioData = {
     },
     {
       id: '3',
+      slug: 'design-system',
       title: 'Design System',
       description: 'Enterprise-grade component library with Storybook, accessibility compliance, and automated visual regression testing.',
       image: '/projects/design-system.png',
@@ -36,6 +39,7 @@ export const mockData: PortfolioData = {
   archivedProjects: [
     {
       id: '4',
+      slug: 'real-time-analytics',
       title: 'Real-time Analytics',
       description: 'Live data visualization dashboard with WebSocket integration and custom metrics.',
       image: '/projects/analytics.png',
@@ -46,6 +50,7 @@ export const mockData: PortfolioData = {
     },
     {
       id: '5',
+      slug: 'mobile-app',
       title: 'Mobile App',
       description: 'Cross-platform mobile application for task management with offline capabilities.',
       image: '/projects/mobile.png',
@@ -56,6 +61,7 @@ export const mockData: PortfolioData = {
     },
     {
       id: '6',
+      slug: 'cloud-infrastructure',
       title: 'Cloud Infrastructure',
       description: 'Terraform-based infrastructure as code for scalable cloud deployments.',
       image: '/projects/infrastructure.png',

@@ -1,3 +1,31 @@
+export interface Profile {
+  greeting?: string | null
+  titleLine1?: string | null
+  titleLine2?: string | null
+  description?: string | null
+  email?: string | null
+  githubUrl?: string | null
+  linkedinUrl?: string | null
+  twitterUrl?: string | null
+  heroImage?: string | null
+  resumeUrl?: string | null
+}
+
+export interface CaseStudy {
+  challenge?: string | null
+  solution?: string | null
+  outcome?: string | null
+  fullDescription?: string | null
+  highlights?: string[] | null
+  architectureSteps?: string[] | null
+  apiEndpoints?: {
+    _key: string
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
+    path: string
+    description?: string | null
+  }[] | null
+}
+
 export interface Project {
   id: string
   slug: string
@@ -8,6 +36,11 @@ export interface Project {
   url?: string
   featured: boolean
   size?: 'small' | 'medium' | 'large'
+  caseStudy?: CaseStudy | null
+  projectType?: 'backend-api' | 'web-app' | null
+  repositoryUrl?: string | null
+  demoUrl?: string | null
+  apiDocsUrl?: string | null
 }
 
 export interface Experience {

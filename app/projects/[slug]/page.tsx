@@ -1,182 +1,93 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft } from 'lucide-react'
+import { AppWindow, ArrowRight, ArrowUpRight, Braces, ChevronRight } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { PortfolioShell } from '@/components/portfolio/PortfolioShell'
+import { ProjectLinks } from '@/components/portfolio/ProjectLinks'
+import { ProjectScreenshot } from '@/components/portfolio/ProjectScreenshot'
+import { getProjectContent } from '@/lib/portfolio'
+import { getProjectKind, getProjectKindLabel } from '@/lib/projectPresentation'
 import { client } from '@/sanity/lib/client'
+import styles from '@/components/portfolio/portfolio.module.css'
 
 interface ProjectCaseStudyProps {
-  params: Promise<{
-    slug: string
-  }>
+  params: Promise<{ slug: string }>
 }
 
 export const dynamicParams = true
+export const revalidate = 0
 
 export async function generateStaticParams() {
-  const projects = await client.fetch(`*[_type == "project"]{ "slug": slug.current }`)
-  return projects.map((project: { slug: string }) => ({
-    slug: project.slug,
-  }))
+  return client.fetch<{ slug: string }[]>(`*[_type == "project" && defined(slug.current)]{ "slug": slug.current }`)
 }
 
-export async function generateMetadata({ params }: ProjectCaseStudyProps) {
-  const resolvedParams = await params
-  const project = await client.fetch(
-    `*[_type == "project" && slug.current == $slug][0]{ title, description }`,
-    { slug: resolvedParams.slug }
-  )
-  
+export async function generateMetadata({ params }: ProjectCaseStudyProps): Promise<Metadata> {
+  const { slug } = await params
+  const { project } = await getProjectContent(slug)
   return {
-    title: project ? `${project.title} - Case Study` : 'Project',
+    title: project ? `${project.title} | Ahmad Ilham` : 'Project Not Found',
     description: project?.description,
   }
 }
 
 export default async function ProjectCaseStudy({ params }: ProjectCaseStudyProps) {
-  const resolvedParams = await params
-  const project = await client.fetch(
-    `*[_type == "project" && slug.current == $slug][0]{
-      title,
-      description,
-      "image": mainImage.asset->url,
-      "tags": techStack,
-      caseStudy
-    }`,
-    { slug: resolvedParams.slug }
-  )
+  const { slug } = await params
+  const { profile, project, projects } = await getProjectContent(slug)
+  if (!project) notFound()
 
-  if (!project) {
-    notFound()
-  }
-
-  // Fallback data if case study isn't fully filled out
-  const caseStudy = project.caseStudy || {
-    challenge: 'Information not provided.',
-    solution: 'Information not provided.',
-    outcome: 'Information not provided.',
-    fullDescription: project.description || 'Information not provided.',
-    highlights: [],
-  }
+  const isApi = getProjectKind(project) === 'backend-api'
+  const KindIcon = isApi ? Braces : AppWindow
+  const sections = [
+    { id: 'overview', title: 'Overview', content: project.caseStudy?.fullDescription || project.description },
+    { id: 'challenge', title: 'The challenge', content: project.caseStudy?.challenge },
+    { id: 'solution', title: 'The solution', content: project.caseStudy?.solution },
+    { id: 'outcome', title: 'Results & takeaways', content: project.caseStudy?.outcome },
+  ].filter((section) => section.content?.trim())
+  const architecture = (project.caseStudy?.architectureSteps ?? []).map((step) => step.trim()).filter(Boolean)
+  const endpoints = (project.caseStudy?.apiEndpoints ?? []).filter((endpoint) => endpoint.method && endpoint.path?.trim())
+  const highlights = (project.caseStudy?.highlights ?? []).filter((highlight) => highlight.trim())
+  const contents = [
+    ...sections.map(({ id, title }) => ({ id, title })),
+    ...(architecture.length ? [{ id: 'system-flow', title: 'System flow' }] : []),
+    ...(endpoints.length ? [{ id: 'api-overview', title: 'API overview' }] : []),
+    ...(highlights.length ? [{ id: 'highlights', title: 'Key features' }] : []),
+  ]
+  const projectIndex = projects.findIndex((item) => item.id === project.id)
+  const nextProject = projects.length > 1 ? projects[(projectIndex + 1) % projects.length] : null
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-40 glass-dark border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-text-secondary hover:text-accent transition-colors duration-300"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Home
-          </Link>
+    <PortfolioShell profile={profile}>
+      <header className={`${styles.pageIntro} ${styles.studyIntro}`}>
+        <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
+          <Link href="/projects">Projects</Link><ChevronRight size={13} aria-hidden="true" /><span aria-current="page">{project.title}</span>
+        </nav>
+        <div className={`${styles.projectKind} ${isApi ? styles.apiKind : ''}`}><KindIcon size={14} aria-hidden="true" />{getProjectKindLabel(project)}</div>
+        <h1>{project.title}<span>.</span></h1>
+        <p>{project.description}</p>
+        <ProjectLinks project={project} buttons />
+      </header>
+
+      {!!project.tags.length && <dl className={styles.detailMeta}><dt>Built with</dt><dd><ul className={styles.stackTokens}>{project.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul></dd></dl>}
+      {project.image && <ProjectScreenshot src={project.image} title={project.title} />}
+
+      {!!contents.length && <div className={styles.caseStudyLayout}>
+        <aside className={styles.studySidebar}>
+          <nav aria-label="Case study contents"><p>Contents</p><ol>{contents.map((item, index) => <li key={item.id}><a href={`#${item.id}`}><span>{String(index + 1).padStart(2, '0')}</span>{item.title}</a></li>)}</ol></nav>
+        </aside>
+        <div className={styles.studyBody}>
+          {sections.map((section) => <section id={section.id} className={styles.studySection} key={section.id}><h2>{section.title}</h2><p>{section.content}</p></section>)}
+          {!!architecture.length && <section id="system-flow" className={styles.studySection}><h2>System flow</h2><ol className={styles.systemFlow}>{architecture.map((step, index) => <li key={`${index}-${step}`}><span className={styles.flowNumber}>{String(index + 1).padStart(2, '0')}</span><span>{step}</span>{index < architecture.length - 1 && <ArrowRight size={16} aria-hidden="true" />}</li>)}</ol></section>}
+          {!!endpoints.length && <section id="api-overview" className={styles.studySection}><h2>API overview</h2><table className={styles.endpointTable}><thead><tr><th scope="col">Method</th><th scope="col">Endpoint</th></tr></thead><tbody>{endpoints.map((endpoint) => <tr key={endpoint._key}><td><span className={styles.httpMethod} data-method={endpoint.method}>{endpoint.method}</span></td><td><code>{endpoint.path}</code>{endpoint.description && <p>{endpoint.description}</p>}</td></tr>)}</tbody></table></section>}
+          {!!highlights.length && <section id="highlights" className={styles.studySection}><h2>Key features</h2><ul className={styles.featureList}>{highlights.map((highlight, index) => <li key={index}>{highlight}</li>)}</ul></section>}
         </div>
-      </nav>
+      </div>}
 
-      {/* Project Screenshot */}
-      <section className="border-b border-white/10 bg-black/80 px-4 py-8 md:px-6 md:py-12">
-        <div className="relative mx-auto aspect-video w-full max-w-7xl overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
-          {project.image ? (
-            <Image
-              src={project.image}
-              alt={project.title}
-              fill
-              priority
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, 1280px"
-            />
-          ) : (
-            <div className="h-full w-full bg-accent/10" />
-          )}
-        </div>
-      </section>
-
-      {/* Content Section */}
-      <section className="relative z-10 mx-auto max-w-4xl px-6 py-16">
-        {/* Title and Tech Stack */}
-        <div className="bg-card border border-white/10 rounded-2xl p-8 md:p-12 glass-dark mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text text-pretty">
-            {project.title}
-          </h1>
-
-          <div className="flex flex-wrap gap-3 mb-8">
-            {project.tags?.map((tag: string) => (
-              <span
-                key={tag}
-                className="px-4 py-2 bg-accent/10 border border-accent/30 text-accent rounded-full text-sm font-medium hover:bg-accent/20 transition-colors duration-300"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <p className="text-lg text-text-secondary leading-relaxed">
-            {project.description}
-          </p>
-        </div>
-
-        {/* Case Study Content Grid */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <div className="bg-card border border-white/10 rounded-2xl p-8 glass-dark hover:border-accent/30 transition-all duration-300">
-            <h2 className="text-2xl font-bold mb-4 text-accent">Challenge</h2>
-            <p className="text-text-secondary leading-relaxed">
-              {caseStudy.challenge}
-            </p>
-          </div>
-
-          <div className="bg-card border border-white/10 rounded-2xl p-8 glass-dark hover:border-accent/30 transition-all duration-300">
-            <h2 className="text-2xl font-bold mb-4 text-accent">Solution</h2>
-            <p className="text-text-secondary leading-relaxed">
-              {caseStudy.solution}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-card border border-white/10 rounded-2xl p-8 md:p-12 glass-dark mb-12 border-accent/20">
-          <h2 className="text-3xl font-bold mb-4 gradient-text">Outcome & Impact</h2>
-          <p className="text-lg text-text-secondary leading-relaxed">
-            {caseStudy.outcome}
-          </p>
-        </div>
-
-        <div className="bg-card border border-white/10 rounded-2xl p-8 md:p-12 glass-dark mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-foreground">Project Overview</h2>
-          <p className="text-lg text-text-secondary leading-relaxed mb-8">
-            {caseStudy.fullDescription}
-          </p>
-
-          {caseStudy.highlights?.length > 0 && (
-            <div>
-              <h3 className="text-2xl font-bold mb-6 text-accent">Key Highlights</h3>
-              <ul className="space-y-4">
-                {caseStudy.highlights.map((highlight: string, index: number) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-4 p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors duration-300"
-                  >
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center mt-0.5">
-                      <div className="w-2 h-2 rounded-full bg-accent" />
-                    </div>
-                    <span className="text-text-secondary leading-relaxed">
-                      {highlight}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        <div className="text-center">
-          <p className="text-text-secondary mb-6">Interested in working together?</p>
-          <Link
-            href="/#contact"
-            className="inline-flex px-8 py-4 bg-accent text-background font-semibold rounded-lg hover:bg-accent/90 transition-colors duration-300"
-          >
-            Get in Touch
-          </Link>
-        </div>
-      </section>
-    </main>
+      {nextProject && <Link href={`/projects/${nextProject.slug || nextProject.id}`} className={styles.nextProject}>
+        <div><span className={styles.nextLabel}>Next project <ArrowRight size={14} aria-hidden="true" /></span><h2>{nextProject.title}</h2><p>{getProjectKindLabel(nextProject)}</p></div>
+        {nextProject.image && <div className={styles.nextImage}><Image src={nextProject.image} alt={`${nextProject.title} screenshot`} fill sizes="160px" /></div>}
+      </Link>}
+      <div className={styles.detailContact}><p>Interested in working together?</p><Link href="/#contact" className={styles.textLink}>Get in touch <ArrowUpRight size={16} aria-hidden="true" /></Link></div>
+    </PortfolioShell>
   )
 }
