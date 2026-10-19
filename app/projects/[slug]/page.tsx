@@ -73,25 +73,26 @@ export default async function ProjectCaseStudy({ params }: ProjectCaseStudyProps
         </div>
       </nav>
 
-      {/* Hero Section with Large Image */}
-      <section className="relative w-full h-screen max-h-[600px] md:max-h-[700px] overflow-hidden">
-        {project.image ? (
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            priority
-            className="object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-accent/10" />
-        )}
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+      {/* Project Screenshot */}
+      <section className="border-b border-white/10 bg-black/80 px-4 py-8 md:px-6 md:py-12">
+        <div className="relative mx-auto aspect-video w-full max-w-7xl overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
+          {project.image ? (
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              priority
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 1280px"
+            />
+          ) : (
+            <div className="h-full w-full bg-accent/10" />
+          )}
+        </div>
       </section>
 
       {/* Content Section */}
-      <section className="relative z-10 -mt-40 mx-auto max-w-4xl px-6 pb-20">
+      <section className="relative z-10 mx-auto max-w-4xl px-6 py-16">
         {/* Title and Tech Stack */}
         <div className="bg-card border border-white/10 rounded-2xl p-8 md:p-12 glass-dark mb-12">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text text-pretty">

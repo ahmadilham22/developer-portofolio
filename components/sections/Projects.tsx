@@ -11,7 +11,7 @@ interface ProjectsProps {
 }
 
 export function Projects({ projects }: ProjectsProps) {
-  const featuredProjects = projects.filter((p) => p.featured).slice(0, 3)
+  const featuredProjects = projects.filter((p) => p.featured)
 
   return (
     <section id="work" className="py-24 px-6 max-w-7xl mx-auto relative z-10">
@@ -20,7 +20,7 @@ export function Projects({ projects }: ProjectsProps) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
+        className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
       >
         <div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -32,13 +32,11 @@ export function Projects({ projects }: ProjectsProps) {
         </div>
       </motion.div>
 
-      {/* Asymmetrical Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16 auto-rows-[350px] md:auto-rows-[450px]">
-        {featuredProjects.map((project, index) => (
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 auto-rows-[320px] ${featuredProjects.length >= 6 ? 'lg:grid-cols-3' : ''}`}>
+        {featuredProjects.map((project) => (
           <ProjectCard
             key={project.id}
             project={project}
-            size={index === 0 ? 'large' : 'small'}
           />
         ))}
       </div>
